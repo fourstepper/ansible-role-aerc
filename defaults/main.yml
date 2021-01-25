@@ -1,2 +1,3 @@
 ---
 install_filters: true
+src_dir: "$HOME/workspace/src"
