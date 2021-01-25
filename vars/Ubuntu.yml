@@ -1,0 +1,8 @@
+---
+deps:
+  - golang
+  - libnotmuch-dev
+  - git
+  - scdoc
+  - make
+  - w3m

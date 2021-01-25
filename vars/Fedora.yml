@@ -1,0 +1,9 @@
+---
+# defaults file for ansible-role-aerc
+deps:
+  - go
+  - notmuch-devel
+  - git
+  - scdoc
+  - make
+  - w3m

@@ -1,0 +1,8 @@
+---
+deps:
+  - go
+  - notmuch-dev
+  - git
+  - scdoc
+  - w3m
+  - make

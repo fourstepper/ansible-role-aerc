@@ -1,0 +1,75 @@
+---
+# tasks file for ansible-role-aerc
+- name: Include vars for the required distribution
+  include_vars: "{{ ansible_facts['distribution']}}.yml"
+
+- name: Make sure dependencies are installed
+  package:
+    name: "{{ deps }}"
+    state: present
+  become: true
+
+- name: Make sure the src dir is present
+  file:
+    path: "{{ src_dir }}/aerc"
+    state: directory
+
+- name: Copy the project to the src dir
+  git:
+    repo: "https://git.sr.ht/~sircmpwn/aerc"
+    dest: "{{ src_dir }}/aerc"
+    force: true
+    update: "{{ upgrade | default(false) }}"
+  changed_when: false
+
+- name: Install aerc
+  shell:
+    cmd: "sudo make install"
+    chdir: "{{ src_dir }}/aerc"
+    warn: false
+  environment:
+    GOFLAGS: "-tags=notmuch"
+  changed_when: false
+
+- name: Create directory structure for filters
+  file:
+    path: /usr/local/share/aerc/filters
+    state: directory
+    recurse: true
+  become: true
+  when: install_filters is defined and install_filters
+
+- name: Copy the extra filters
+  copy:
+    src: "files/aerc-filters/{{ item }}"
+    dest: "/usr/local/share/aerc/filters/{{ item }}"
+    mode: 0777
+  become: true
+  when: install_filters is defined and install_filters
+  loop:
+    - html-noproxy
+
+- name: Copy the aerc configuration files from global folder
+  copy:
+    src: "../../../config_files/aerc"
+    dest: "$HOME/.config/"
+  ignore_errors: true
+  register: global_config
+
+- name: Copy the aerc configuration files locally
+  copy:
+    src: "files/aerc"
+    dest: "$HOME/.config/aerc"
+  when: global_config.failed
+
+- name: Check if accounts.conf exists
+  stat:
+    path: "$HOME/.config/aerc/accounts.conf"
+  register: accounts_file
+
+- name: Fix the permissions on accounts.conf
+  file:
+    path: "$HOME/.config/aerc/accounts.conf"
+    state: file
+    mode: '0600'
+  when: accounts_file.stat.exists
