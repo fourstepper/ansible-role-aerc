@@ -37,7 +37,6 @@
   environment:
     GOFLAGS: "-tags=notmuch"
   changed_when: false
-  become: true
 
 - name: Create directory structure for filters
   file:
